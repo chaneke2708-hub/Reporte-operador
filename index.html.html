@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Operador</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --border: #2a2e3d;
+    --border-focus: #4f6ef7;
+    --accent: #4f6ef7;
+    --accent-glow: rgba(79,110,247,0.15);
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-label: #9ca3af;
+    --success: #10b981;
+    --success-bg: rgba(16,185,129,0.1);
+    --error: #ef4444;
+    --error-bg: rgba(239,68,68,0.1);
+    --warning: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-tag::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .header p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  /* Field */
+  .field {
+    margin-bottom: 22px;
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .field label .req {
+    color: var(--accent);
+    margin-left: 2px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  input::placeholder, textarea::placeholder {
+    color: var(--text-muted);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  /* Select wrapper con flecha */
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    font-size: 13px;
+  }
+  select option {
+    background: #1a1d27;
+    color: var(--text);
+  }
+
+  /* Componente field animado */
+  #field-componente {
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  #field-componente.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+  }
+  #field-componente.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* Email config */
+  .config-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 22px;
+  }
+  .config-block .config-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  /* Submit button */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+    letter-spacing: -0.01em;
+  }
+  .btn:hover { opacity: 0.9; box-shadow: 0 4px 20px rgba(79,110,247,0.35); }
+  .btn:active { transform: scale(0.99); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Status message */
+  .status {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    display: none;
+  }
+  .status.success {
+    background: var(--success-bg);
+    border: 1px solid var(--success);
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .status.error {
+    background: var(--error-bg);
+    border: 1px solid var(--error);
+    color: var(--error);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Info note */
+  .note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .note a { color: var(--accent); text-decoration: none; }
+
+  /* Loading spinner */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Grid 2 cols */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } .card { padding: 24px 20px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">Sistema de reportes</div>
+  <h1>Reporte de Operador</h1>
+  <p>Registra fallas o mantenimientos de unidades. Cada envío queda guardado en el historial automáticamente.</p>
+</div>
+
+<div class="card">
+
+  <!-- CONFIGURACIÓN (solo visible en modo setup) -->
+  <div id="setup-section">
+    <div class="config-block">
+      <div class="config-title">⚙️ Configuración — solo tú ves esto</div>
+      <div class="field">
+        <label>Correo destino de notificaciones <span class="req">*</span></label>
+        <input type="email" id="cfg-email" placeholder="tucorreo@gmail.com" />
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>URL del Google Sheet (para guardar respuestas)</label>
+        <input type="url" id="cfg-sheet" placeholder="https://script.google.com/macros/s/..." />
+        <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">
+          Pega aquí la URL de tu Google Apps Script desplegado. <a href="#instrucciones" style="color:var(--accent)">¿Cómo obtenerla?</a>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="grid2">
+    <div class="field">
+      <label>Fecha <span class="req">*</span></label>
+      <input type="date" id="fecha" />
+    </div>
+    <div class="field">
+      <label>Unidad <span class="req">*</span></label>
+      <input type="text" id="unidad" placeholder="Ej: D30" maxlength="10" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Operador <span class="req">*</span></label>
+    <input type="text" id="operador" placeholder="Nombre completo del operador" />
+  </div>
+
+  <div class="field">
+    <label>Familia <span class="req">*</span></label>
+    <div class="select-wrap">
+      <select id="familia" onchange="actualizarComponentes()">
+        <option value="">— Selecciona una familia —</option>
+        <option value="Suspensión">Suspensión</option>
+        <option value="Motor">Motor</option>
+        <option value="Sistema de Aire">Sistema de Aire</option>
+        <option value="Sistema de Frenos">Sistema de Frenos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field hidden" id="field-componente">
+    <label>Componente <span class="req">*</span></label>
+    <div class="select-wrap">
+      <select id="componente">
+        <option value="">— Selecciona un componente —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Acción <span class="req">*</span></label>
+    <div class="select-wrap">
+      <select id="accion">
+        <option value="">— Selecciona una acción —</option>
+        <option value="Revisar">Revisar</option>
+        <option value="Cambiar">Cambiar</option>
+        <option value="Ajustar">Ajustar</option>
+        <option value="Limpiar">Limpiar</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Observaciones</label>
+    <textarea id="observaciones" placeholder="Describe la falla o situación con detalle..."></textarea>
+  </div>
+
+  <button class="btn" id="btn-enviar" onclick="enviarReporte()">
+    Enviar reporte
+  </button>
+
+  <div class="status" id="status-msg"></div>
+
+  <p class="note">
+    Al enviar, recibirás una notificación por correo y el reporte quedará guardado en el historial.<br>
+    ¿Problemas? Escribe al administrador.
+  </p>
+</div>
+
+<!-- INSTRUCCIONES -->
+<div id="instrucciones" style="width:100%;max-width:560px;margin-top:32px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Guía de configuración</div>
+    <h2 style="font-size:17px;font-weight:700;margin-bottom:16px;">Cómo conectar con Google Sheets</h2>
+
+    <div style="font-size:13px;color:var(--text-muted);line-height:1.8;">
+      <p style="margin-bottom:12px;"><strong style="color:var(--text);">1.</strong> Abre <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);">Google Sheets</a> y crea una hoja nueva. En la primera fila pon estas columnas exactas:</p>
+      <code style="display:block;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);margin-bottom:16px;overflow-x:auto;">Fecha | Operador | Unidad | Familia | Componente | Accion | Observaciones</code>
+
+      <p style="margin-bottom:12px;"><strong style="color:var(--text);">2.</strong> En Sheets ve a <strong style="color:var(--text);">Extensiones → Apps Script</strong> y pega este código:</p>
+      <pre id="apps-script-code" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a5b4fc;overflow-x:auto;line-height:1.7;white-space:pre-wrap;margin-bottom:16px;">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+
+  sheet.appendRow([
+    data.fecha,
+    data.operador,
+    data.unidad,
+    data.familia,
+    data.componente,
+    data.accion,
+    data.observaciones,
+    new Date()
+  ]);
+
+  // Enviar correo de notificación
+  var correo = "TU_CORREO@gmail.com"; // ← Cambia esto
+  var asunto = "Nuevo reporte: " + data.unidad + " - " + data.familia;
+  var cuerpo = "Se recibió un nuevo reporte:\n\n"
+    + "Fecha: " + data.fecha + "\n"
+    + "Operador: " + data.operador + "\n"
+    + "Unidad: " + data.unidad + "\n"
+    + "Familia: " + data.familia + "\n"
+    + "Componente: " + data.componente + "\n"
+    + "Acción: " + data.accion + "\n"
+    + "Observaciones: " + data.observaciones;
+
+  MailApp.sendEmail(correo, asunto, cuerpo);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({resultado: "ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+
+      <p style="margin-bottom:8px;"><strong style="color:var(--text);">3.</strong> Cambia <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:11px;">"TU_CORREO@gmail.com"</code> por tu correo real.</p>
+      <p style="margin-bottom:8px;"><strong style="color:var(--text);">4.</strong> Haz clic en <strong style="color:var(--text);">Implementar → Nueva implementación → Aplicación web</strong>.</p>
+      <p style="margin-bottom:8px;"><strong style="color:var(--text);">5.</strong> En "Quién puede acceder" elige <strong style="color:var(--text);">Cualquier persona</strong>. Copia la URL generada.</p>
+      <p style="margin-bottom:16px;"><strong style="color:var(--text);">6.</strong> Pégala en el campo "URL del Google Sheet" arriba en este formulario y guarda.</p>
+
+      <button onclick="copiarScript()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;">
+        📋 Copiar código Apps Script
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Componentes por familia ─────────────────────────────────────
+const COMPONENTES = {
+  "Suspensión": [
+    "Bolsa de Aire",
+    "Rotachamber",
+    "Amortiguador",
+    "Barra Estabilizadora",
+    "Resorte",
+    "Brazo de Control",
+    "Terminal de Dirección"
+  ],
+  "Motor": [
+    "EGR",
+    "Turbocompresor",
+    "Inyector",
+    "Filtro de Aceite",
+    "Filtro de Combustible",
+    "Banda Serpentina",
+    "Bomba de Agua",
+    "Radiador"
+  ],
+  "Sistema de Aire": [
+    "Bolsa de Aire",
+    "Válvula Niveladora",
+    "Compresor de Aire",
+    "Secador de Aire",
+    "Depósito de Aire",
+    "Manguera de Aire"
+  ],
+  "Sistema de Frenos": [
+    "Rotachamber",
+    "Balatas",
+    "Disco de Freno",
+    "Tambor",
+    "Mordaza",
+    "Regulador Automático",
+    "Válvula de Freno"
+  ]
+};
+
+// ─── Set fecha de hoy por defecto ────────────────────────────────
+document.getElementById('fecha').valueAsDate = new Date();
+
+// ─── Actualizar componentes según familia ────────────────────────
+function actualizarComponentes() {
+  const familia = document.getElementById('familia').value;
+  const fieldComp = document.getElementById('field-componente');
+  const selectComp = document.getElementById('componente');
+
+  if (!familia) {
+    fieldComp.classList.remove('visible');
+    fieldComp.classList.add('hidden');
+    return;
+  }
+
+  // Poblar opciones
+  selectComp.innerHTML = '<option value="">— Selecciona un componente —</option>';
+  (COMPONENTES[familia] || []).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    selectComp.appendChild(opt);
+  });
+
+  fieldComp.classList.remove('hidden');
+  fieldComp.classList.add('visible');
+}
+
+// ─── Validación ──────────────────────────────────────────────────
+function validar() {
+  const campos = [
+    { id: 'fecha', nombre: 'Fecha' },
+    { id: 'operador', nombre: 'Operador' },
+    { id: 'unidad', nombre: 'Unidad' },
+    { id: 'familia', nombre: 'Familia' },
+    { id: 'componente', nombre: 'Componente' },
+    { id: 'accion', nombre: 'Acción' },
+  ];
+  for (const c of campos) {
+    if (!document.getElementById(c.id).value.trim()) {
+      return `El campo "${c.nombre}" es obligatorio.`;
+    }
+  }
+  return null;
+}
+
+// ─── Enviar reporte ──────────────────────────────────────────────
+async function enviarReporte() {
+  const statusEl = document.getElementById('status-msg');
+  const btn = document.getElementById('btn-enviar');
+
+  // Validar
+  const error = validar();
+  if (error) {
+    mostrarStatus('error', '⚠️ ' + error);
+    return;
+  }
+
+  const sheetUrl = document.getElementById('cfg-sheet')?.value?.trim();
+
+  const payload = {
+    fecha: document.getElementById('fecha').value,
+    operador: document.getElementById('operador').value.trim(),
+    unidad: document.getElementById('unidad').value.trim().toUpperCase(),
+    familia: document.getElementById('familia').value,
+    componente: document.getElementById('componente').value,
+    accion: document.getElementById('accion').value,
+    observaciones: document.getElementById('observaciones').value.trim()
+  };
+
+  // Si no hay URL configurada → modo demo
+  if (!sheetUrl) {
+    setTimeout(() => {
+      mostrarStatus('success', '✅ Reporte enviado correctamente (modo demo — configura la URL de Apps Script para guardar en Sheets)');
+      limpiarFormulario();
+    }, 800);
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    setTimeout(() => { btn.disabled = false; btn.innerHTML = 'Enviar reporte'; }, 900);
+    return;
+  }
+
+  // Enviar a Apps Script
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    await fetch(sheetUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    mostrarStatus('success', '✅ Reporte registrado. Notificación enviada por correo.');
+    limpiarFormulario();
+  } catch (err) {
+    mostrarStatus('error', '❌ Error al enviar. Verifica la URL de Apps Script.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Enviar reporte';
+  }
+}
+
+function mostrarStatus(tipo, msg) {
+  const el = document.getElementById('status-msg');
+  el.className = 'status ' + tipo;
+  el.textContent = msg;
+  el.style.display = 'flex';
+  setTimeout(() => { el.style.display = 'none'; }, 7000);
+}
+
+function limpiarFormulario() {
+  document.getElementById('operador').value = '';
+  document.getElementById('unidad').value = '';
+  document.getElementById('familia').value = '';
+  document.getElementById('componente').value = '';
+  document.getElementById('accion').value = '';
+  document.getElementById('observaciones').value = '';
+  document.getElementById('field-componente').classList.remove('visible');
+  document.getElementById('field-componente').classList.add('hidden');
+  document.getElementById('fecha').valueAsDate = new Date();
+}
+
+function copiarScript() {
+  const code = document.getElementById('apps-script-code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    alert('Código copiado al portapapeles ✓');
+  });
+}
+</script>
+</body>
+</html>
